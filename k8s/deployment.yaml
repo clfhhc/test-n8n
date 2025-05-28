@@ -30,6 +30,8 @@ spec:
           value: "false"
         - name: N8N_BASIC_AUTH_ACTIVE
           value: "false"
+        - name: N8N_SECURE_COOKIE
+          value: "false"
         resources:
           requests:
             memory: "512Mi"
