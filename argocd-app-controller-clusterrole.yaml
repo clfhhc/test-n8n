@@ -1,0 +1,26 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: argocd-application-controller-n8n-manager
+rules:
+- apiGroups: [""] # core API group
+  resources: ["namespaces"]
+  verbs: ["create", "get", "list", "watch"]
+- apiGroups: [""] # core API group
+  resources: ["persistentvolumeclaims", "services", "secrets", "configmaps", "serviceaccounts", "events"]
+  verbs: ["*"]
+- apiGroups: ["apps"]
+  resources: ["deployments", "statefulsets", "replicasets"]
+  verbs: ["*"]
+- apiGroups: ["batch"]
+  resources: ["jobs", "cronjobs"]
+  verbs: ["*"]
+- apiGroups: ["networking.k8s.io"]
+  resources: ["ingresses"]
+  verbs: ["*"]
+- apiGroups: ["rbac.authorization.k8s.io"] # Needed to create roles/rolebindings in target namespaces
+  resources: ["roles", "rolebindings"]
+  verbs: ["*"]
+# Add other resource types your applications might need
+# This role allows management of common resources and namespace creation.
+# For a production setup, you would scope this down significantly. 
