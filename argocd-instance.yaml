@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  name: example-argocd
+  namespace: argocd # Or your preferred namespace
+spec: {}
+# Add any specific Argo CD configurations here if needed
+# For a basic setup, an empty spec is often enough, 
+# the operator will use sensible defaults.
+# For example, to enable the server component (UI/API):
+#  server:
+# To expose the Argo CD server with a LoadBalancer service (on kind, this usually needs metallb or similar)
+# service:
+# type: LoadBalancer
+# For local access with kind, NodePort or port-forwarding is easier initially.
+# Or configure ingress if you have an ingress controller on kind.
+# Example: 
+# ingress:
+# enabled: true
+# hosts:
+# - argocd.example.com 
+# # You would need to update your /etc/hosts for this to work locally
+# # e.g. <kind-control-plane-ip> argocd.example.com 
