@@ -7,6 +7,9 @@ ENV N8N_PROTOCOL=${N8N_PROTOCOL:-http}
 ENV N8N_USER_MANAGEMENT_DISABLED=${N8N_USER_MANAGEMENT_DISABLED:-false}
 ENV N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-false}
 
+# Install Plaid connector
+RUN npm install n8n-nodes-plaid
+
 # Expose the port
 EXPOSE 5678
 
