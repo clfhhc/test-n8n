@@ -120,3 +120,7 @@ This setup is ready for deploying applications using GitOps principles. For the 
     ```bash
     kubectl apply -f k8s/argocd-app.yaml -n argocd
     ``` 
+3. Port-forward the n8n server service. The service name is `n8n`.
+    ```bash
+    kubectl port-forward -n n8n svc/n8n 8081:80
+    ```

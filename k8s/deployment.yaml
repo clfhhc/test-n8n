@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: n8n
+  namespace: n8n
   labels:
     app: n8n
 spec:
@@ -16,7 +17,7 @@ spec:
     spec:
       containers:
       - name: n8n
-        image: n8nio/n8n:latest
+        image: docker.n8n.io/n8nio/n8n:latest
         ports:
         - containerPort: 5678
         env:
@@ -32,6 +33,8 @@ spec:
           value: "false"
         - name: N8N_SECURE_COOKIE
           value: "false"
+        - name: N8N_DATA_FOLDER
+          value: "/home/node/.n8n"
         resources:
           requests:
             memory: "512Mi"
@@ -45,4 +48,4 @@ spec:
       volumes:
       - name: n8n-data
         persistentVolumeClaim:
-          claimName: n8n-pvc 
+          claimName: n8n-data 
