@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
       - name: n8n
-        image: localhost/n8n-plaid:latest
+        image: n8n-plaid:latest
         imagePullPolicy: Never
         ports:
         - containerPort: 5678
