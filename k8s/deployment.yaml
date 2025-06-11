@@ -17,7 +17,8 @@ spec:
     spec:
       containers:
       - name: n8n
-        image: docker.n8n.io/n8nio/n8n:latest
+        image: localhost:5000/n8n-plaid:latest
+        imagePullPolicy: Never
         ports:
         - containerPort: 5678
         env:
