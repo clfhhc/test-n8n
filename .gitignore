@@ -1,0 +1,4 @@
+# Local dev secrets and generated kube play manifest
+/podman-kube/.env
+/podman-kube/n8n-local.yaml
+

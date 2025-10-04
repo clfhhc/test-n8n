@@ -82,3 +82,57 @@ podman rm -f n8n postgres || true
 podman volume rm n8n_data pg_data || true
 podman network rm n8n-net || true
 ```
+
+---
+
+## Alternative: Podman kube play (one-shot)
+
+You can run both Postgres and n8n from a single Kubernetes-style manifest using Podman.
+
+### Apply (direct YAML)
+
+```bash
+podman kube play "podman-kube/n8n-local.yaml"
+```
+
+Then open: http://localhost:5678
+
+### Notes
+
+- Edit the manifest to set a strong `N8N_ENCRYPTION_KEY` and adjust image/tag if needed.
+- Data is persisted under host paths: `/tmp/n8n-podman/pg_data` and `/tmp/n8n-podman/n8n_data`.
+- The manifest maps host ports 5432 and 5678. Ensure they are free.
+
+### Apply (templated with env vars)
+
+Use the provided template and env file to avoid hardcoding sensitive values:
+
+```bash
+cp podman-kube/env.sample podman-kube/.env
+# edit podman-kube/.env to set strong values
+set -a; source podman-kube/.env; set +a
+envsubst < podman-kube/n8n-local.yaml.tpl > podman-kube/n8n-local.yaml
+podman kube play podman-kube/n8n-local.yaml
+```
+
+Alternatively, export variables ad-hoc without a file:
+
+```bash
+export N8N_IMAGE=localhost/n8n:latest \
+       N8N_HOST=0.0.0.0 \
+       N8N_PROTOCOL=http \
+       WEBHOOK_URL=http://localhost:5678/ \
+       N8N_ENCRYPTION_KEY=$(openssl rand -hex 32) \
+       POSTGRES_DB=n8n \
+       POSTGRES_USER=n8n \
+       POSTGRES_PASSWORD=n8npassword
+envsubst < podman-kube/n8n-local.yaml.tpl > podman-kube/n8n-local.yaml
+podman kube play podman-kube/n8n-local.yaml
+```
+
+### Teardown
+
+```bash
+podman kube down podman-kube/n8n-local.yaml
+rm -rf /tmp/n8n-podman
+```
