@@ -1,34 +1,25 @@
-FROM node:24-alpine
+ARG N8N_IMAGE_TAG=latest
+FROM n8nio/n8n:${N8N_IMAGE_TAG}
 
-ARG N8N_VERSION=latest
+# Optional: space-separated community nodes to install at build time
+# Example: --build-arg COMMUNITY_NODES="n8n-nodes-plaid@latest"
+ARG COMMUNITY_NODES=""
 
-# Set environment variables
-ENV N8N_HOST=${N8N_HOST:-localhost}
-ENV N8N_PORT=${N8N_PORT:-5678}
-ENV N8N_PROTOCOL=${N8N_PROTOCOL:-http}
-ENV N8N_USER_MANAGEMENT_DISABLED=${N8N_USER_MANAGEMENT_DISABLED:-false}
-ENV N8N_BASIC_AUTH_ACTIVE=${N8N_BASIC_AUTH_ACTIVE:-false}
-ENV N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=${N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS:-true}
-ENV N8N_DATA_FOLDER=${N8N_DATA_FOLDER:-/home/node/.n8n}
-ENV TZ=${TZ:-UTC}
-
-RUN if [ -z "$N8N_VERSION" ] ; then echo "The N8N_VERSION argument is missing!" ; exit 1; fi
-
-# Update everything and install needed dependencies
-RUN apk add --update graphicsmagick tzdata
-
-# # Set a custom user to not have n8n run as root
 USER root
 
-# Install n8n and the also temporary all the packages
-# it needs to build it correctly.
-RUN apk --update add --virtual build-dependencies python3 build-base ca-certificates && \
-	npm install -g n8n@${N8N_VERSION} n8n-nodes-plaid && \
-	apk del build-dependencies
+# Ensure n8n user folder exists and install community nodes into it
+ENV N8N_USER_FOLDER=/home/node/.n8n
+RUN mkdir -p /home/node/.n8n && \
+    (npm init -y --prefix /home/node/.n8n >/dev/null 2>&1 || true) && \
+    for PKG in $COMMUNITY_NODES; do \
+      if [ -n "$PKG" ]; then npm install --omit=dev --prefix /home/node/.n8n "$PKG"; fi; \
+    done && \
+    chown -R node:node /home/node/.n8n
 
-WORKDIR /usr/src/app
+# Expose editor/ui port
+EXPOSE 5678
 
-# Expose the port
-EXPOSE $N8N_PORT
+USER node
 
+# Start n8n
 CMD ["n8n", "start"]

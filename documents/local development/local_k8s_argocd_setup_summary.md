@@ -124,3 +124,22 @@ This setup is ready for deploying applications using GitOps principles. For the 
     ```bash
     kubectl port-forward -n n8n svc/n8n 8081:80
     ```
+
+## n8n Kubernetes Resources (in this repo)
+
+- `k8s/secret.yaml` - placeholder Secret for `N8N_ENCRYPTION_KEY` and Postgres credentials. Replace with real values or manage via Sealed/External Secrets.
+- `k8s/postgres.yaml` - Postgres Deployment and Service for n8n database.
+- `k8s/pvc-postgres.yaml` - 10Gi PVC for Postgres data.
+- `k8s/deployment.yaml` - n8n Deployment configured to use Postgres and secure defaults.
+- `k8s/service.yaml` - n8n Service (ClusterIP).
+- `k8s/pvc.yaml` - PVC for n8n user folder `/home/node/.n8n`.
+- `k8s/ingress.yaml` - Ingress (NGINX) with host and TLS placeholders (`n8n.example.com`, `n8n-tls`).
+
+Update placeholders:
+- In `k8s/secret.yaml`, set a strong `N8N_ENCRYPTION_KEY` and real DB credentials.
+- In `k8s/ingress.yaml`, set your real host and TLS secret.
+- In `k8s/deployment.yaml`, ensure `WEBHOOK_URL` matches your ingress URL and image reference points to your registry.
+
+## Local development (Podman)
+
+See `documents/local development/podman_local_development.md` for a step-by-step Podman workflow to run Postgres and n8n locally, including installing community nodes at image build time.

@@ -63,3 +63,32 @@ kubectl port-forward svc/n8n -n n8n 5678:80
 ```
 
 Then access n8n at: `http://localhost:5678` 
+
+## Building and pushing with Podman
+
+Example commands (adjust image registry and hostnames):
+
+```bash
+# Build with community nodes at build time
+podman build \
+  --build-arg N8N_IMAGE_TAG=latest \
+  --build-arg COMMUNITY_NODES="n8n-nodes-plaid@latest" \
+  -t localhost/n8n:latest .
+
+# Run locally (optional)
+podman run --rm -it -p 5678:5678 localhost/n8n:latest
+
+# Push to your registry (example for local registry)
+podman push localhost/n8n:latest
+```
+
+## Kubernetes notes
+
+- Create/update secrets in `k8s/secret.yaml` with your real credentials and encryption key.
+- Apply resources via Argo CD (`k8s/argocd-app.yaml`).
+- Update `k8s/ingress.yaml` host and TLS secret to match your domain and certificate setup.
+
+## Postgres and persistence
+
+- Postgres manifests are included in `k8s/postgres.yaml` with a PVC in `k8s/pvc-postgres.yaml`.
+- n8n data folder is mounted via `k8s/pvc.yaml` to `/home/node/.n8n`.
