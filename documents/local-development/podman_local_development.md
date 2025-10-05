@@ -87,52 +87,54 @@ podman network rm n8n-net || true
 
 ## Alternative: Podman kube play (one-shot)
 
-You can run both Postgres and n8n from a single Kubernetes-style manifest using Podman.
+You can run both Postgres and n8n from a single Kubernetes-style manifest using Podman. This manifest uses `PersistentVolumeClaim`s, which Podman will map to managed named volumes, avoiding common host permission issues.
 
-### Apply (direct YAML)
+### 1. Build the Image
+
+First, ensure your local n8n image is built:
+```bash
+podman build -t localhost/n8n:latest .
+```
+
+### 2. Apply Manifest
+
+#### Apply (direct YAML)
 
 ```bash
+# This uses the pre-generated manifest with default credentials
 podman kube play "podman-kube/n8n-local.yaml"
 ```
 
 Then open: http://localhost:5678
 
-### Notes
+#### Notes
 
-- Edit the manifest to set a strong `N8N_ENCRYPTION_KEY` and adjust image/tag if needed.
-- Data is persisted under host paths: `/tmp/n8n-podman/pg_data` and `/tmp/n8n-podman/n8n_data`.
+- The manifest creates managed volumes for Postgres and n8n data automatically.
 - The manifest maps host ports 5432 and 5678. Ensure they are free.
 
-### Apply (templated with env vars)
+#### Apply (templated with env vars)
 
 Use the provided template and env file to avoid hardcoding sensitive values:
 
 ```bash
-cp podman-kube/env.sample podman-kube/.env
-# edit podman-kube/.env to set strong values
+# 1. Copy the sample env file (only if it doesn't exist)
+cp -n podman-kube/env.sample podman-kube/.env
+
+# 2. Edit podman-kube/.env to set strong/custom values
+# For example: N8N_ENCRYPTION_KEY=$(openssl rand -hex 32)
+
+# 3. Source the variables and use envsubst to generate the manifest
 set -a; source podman-kube/.env; set +a
 envsubst < podman-kube/n8n-local.yaml.tpl > podman-kube/n8n-local.yaml
+
+# 4. Apply the generated manifest
 podman kube play podman-kube/n8n-local.yaml
 ```
 
-Alternatively, export variables ad-hoc without a file:
+### 3. Teardown
 
-```bash
-export N8N_IMAGE=localhost/n8n:latest \
-       N8N_HOST=0.0.0.0 \
-       N8N_PROTOCOL=http \
-       WEBHOOK_URL=http://localhost:5678/ \
-       N8N_ENCRYPTION_KEY=$(openssl rand -hex 32) \
-       POSTGRES_DB=n8n \
-       POSTGRES_USER=n8n \
-       POSTGRES_PASSWORD=n8npassword
-envsubst < podman-kube/n8n-local.yaml.tpl > podman-kube/n8n-local.yaml
-podman kube play podman-kube/n8n-local.yaml
-```
-
-### Teardown
+This command will stop the pod and remove the associated volumes.
 
 ```bash
 podman kube down podman-kube/n8n-local.yaml
-rm -rf /tmp/n8n-podman
 ```

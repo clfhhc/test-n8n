@@ -1,4 +1,26 @@
 apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-pgdata-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: n8n-user-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
 kind: Pod
 metadata:
   name: n8n-local
@@ -46,6 +68,8 @@ spec:
       value: "${WEBHOOK_URL}"
     - name: N8N_ENCRYPTION_KEY
       value: "${N8N_ENCRYPTION_KEY}"
+    - name: N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS
+      value: "true"
     - name: DB_TYPE
       value: "postgresdb"
     - name: DB_POSTGRESDB_HOST
@@ -68,11 +92,9 @@ spec:
       mountPath: /home/node/.n8n
   volumes:
   - name: pgdata
-    hostPath:
-      path: /tmp/n8n-podman/pg_data
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: n8n-pgdata-pvc
   - name: n8n-user
-    hostPath:
-      path: /tmp/n8n-podman/n8n_data
-      type: DirectoryOrCreate
+    persistentVolumeClaim:
+      claimName: n8n-user-pvc
 

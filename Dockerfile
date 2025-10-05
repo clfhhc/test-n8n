@@ -9,6 +9,10 @@ USER root
 
 # Ensure n8n user folder exists and install community nodes into it
 ENV N8N_USER_FOLDER=/home/node/.n8n
+ENV N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS=true
+ENV N8N_RUNNERS_ENABLED=true
+ENV N8N_BLOCK_ENV_ACCESS_IN_NODE=true
+ENV N8N_GIT_NODE_DISABLE_BARE_REPOS=true
 RUN mkdir -p /home/node/.n8n && \
     (npm init -y --prefix /home/node/.n8n >/dev/null 2>&1 || true) && \
     for PKG in $COMMUNITY_NODES; do \
@@ -20,6 +24,3 @@ RUN mkdir -p /home/node/.n8n && \
 EXPOSE 5678
 
 USER node
-
-# Start n8n
-CMD ["n8n", "start"]
